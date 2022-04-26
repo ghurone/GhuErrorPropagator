@@ -1,18 +1,18 @@
 from ghuerror import *
 
+import webbrowser
 import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import showerror
 
 import matplotlib
-import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 matplotlib.use('TkAgg')
 
-fonte_titlo = "-family {Lucida} -size 26 -weight bold"
-fonte_texto = "-family {Lucida} -size 14"
-
+fonte_titlo = "-family {Comic Sans MS} -size 26 -weight bold"
+fonte_texto = "-family {Comic Sans MS} -size 14"
+versao = '1.0.0'
 
 class MainWindow:
     def __init__(self) -> None:
@@ -77,6 +77,7 @@ class MainWindow:
         self.b_add.configure(borderwidth=0)
         self.b_add.configure(text="Adicionar")
         self.b_add.configure(font=fonte_texto)
+        self.b_add.configure(cursor='hand2')
         self.b_add.configure(command=self.adicionar)
         self.b_add.place(x=10, y=370, height=30, width=100)
         
@@ -88,6 +89,7 @@ class MainWindow:
         self.b_edit.configure(borderwidth=0)
         self.b_edit.configure(text="Editar")
         self.b_edit.configure(font=fonte_texto)
+        self.b_edit.configure(cursor='hand2')
         self.b_edit.configure(command=self.editar)
         self.b_edit.place(x=150, y=370, height=30, width=100)
 
@@ -99,6 +101,7 @@ class MainWindow:
         self.b_del.configure(borderwidth=0)
         self.b_del.configure(text="Deletar")
         self.b_del.configure(font=fonte_texto)
+        self.b_del.configure(cursor='hand2')
         self.b_del.configure(command=self.deletar)
         self.b_del.place(x=290, y=370, height=30, width=100)
         
@@ -110,14 +113,42 @@ class MainWindow:
         self.botao.configure(borderwidth=0)
         self.botao.configure(text="PROPAGAR!!")
         self.botao.configure(font=fonte_texto)
+        self.botao.configure(cursor='hand2')
         self.botao.configure(command=self.propagar)
         self.botao.place(x=135, y=410, height=30, width=130)
-                
+        
+        # Label versão
+        self.lversao = tk.Button(self.window)
+        self.lversao.configure(background="#ffffff")
+        self.lversao.configure(activebackground="#ffffff")
+        self.lversao.configure(activeforeground="#000000")
+        self.lversao.configure(borderwidth=0)
+        self.lversao.configure(text=f'v {versao}')
+        self.lversao.configure(font="-family {Comic Sans MS} -size 10")
+        self.lversao.configure(cursor='heart')
+        self.lversao.configure(relief='raised')
+        self.lversao.configure(command=self.abrir_navegador)
+        self.lversao.place(x=350, y=420, height=30)
+        
+        self.jans = []
+        self.window.protocol('WM_DELETE_WINDOW', self.fechar)
+    
+    @staticmethod
+    def abrir_navegador():
+        webbrowser.open('https://www.github.com/ghurone/GhuErrorPropagator')
+        
+    def fechar(self):
+        for jan in self.jans:
+            jan.window.destroy()
+        
+        self.window.destroy()
+    
     def run(self):
         self.window.mainloop()
 
     def adicionar(self):
         jan = AddWindow(self)
+        self.jans.append(jan)
         jan.run()
 
     def editar(self):
@@ -126,6 +157,7 @@ class MainWindow:
             item = s_item[0]
             
             jan = EditWindow(self, item)
+            self.jans.append(jan)
             jan.run()
 
         else:
@@ -152,7 +184,11 @@ class MainWindow:
         if val:
             try:
                 ghu = GhuErrorPropagator(func, val)
-                jan = PropWindow(ghu)
+                ghu.resultado_final()
+                
+                jan = PropWindow(ghu, self)
+                self.jans.append(jan)
+                
                 jan.run()
                 
             except Exception as e:
@@ -161,7 +197,7 @@ class MainWindow:
             showerror('ERRO', 'Insira variáveis para sua função')
       
   
-class AddWindow():
+class AddWindow:
     def __init__(self, main: object) -> None:
         self.main = main
         self.window = tk.Tk()
@@ -219,20 +255,27 @@ class AddWindow():
         self.botao.configure(borderwidth=0)
         self.botao.configure(text="Adicionar!")
         self.botao.configure(font=fonte_texto)
+        self.botao.configure(cursor='hand2')
         self.botao.configure(command=self.enviar)
         self.botao.place(x=90, y=110, height=30, width=120)
-                
+        
+        self.window.protocol('WM_DELETE_WINDOW', self.fechar)
+    
+    def fechar(self):
+        del self.main.jans[self.main.jans.index(self)]
+        self.window.destroy()
+        
     def enviar(self):
         nome = self.inome.get()
         valor = self.ivalor.get()
         inc = self.iinc.get()
         
-        if nome.isalpha() and N(valor).is_number and N(inc).is_number:
+        if not N(nome).is_number and N(valor).is_number and N(inc).is_number:
             if not self.main.ja_existe(nome):
                 self.main.var.insert('', index='end', text='', values=(nome, valor, inc))
             else:
                 showerror('ERRO', 'Essa variável já existe!')
-            self.window.destroy()
+            self.fechar()
         else:
             showerror('ERRO', 'Digite os campos corretamente!')
         
@@ -240,7 +283,7 @@ class AddWindow():
         self.window.mainloop()
 
 
-class EditWindow():
+class EditWindow:
     def __init__(self, main: object, item) -> None:
         self.main = main
         self.window = tk.Tk()
@@ -298,6 +341,7 @@ class EditWindow():
         self.botao.configure(borderwidth=0)
         self.botao.configure(text="Editar!")
         self.botao.configure(font=fonte_texto)
+        self.botao.configure(cursor='hand2')
         self.botao.configure(command=self.enviar)
         self.botao.place(x=90, y=110, height=30, width=120)
         
@@ -308,7 +352,13 @@ class EditWindow():
         self.iinc.insert(0, inc)
         self.inome.insert(0, nome)
         self.ivalor.insert(0, valor)
-
+        
+        self.window.protocol('WM_DELETE_WINDOW', self.fechar)
+    
+    def fechar(self):
+        del self.main.jans[self.main.jans.index(self)]
+        self.window.destroy()
+        
     def enviar(self):
         nome = self.inome.get()
         valor = self.ivalor.get()
@@ -320,7 +370,7 @@ class EditWindow():
             else:
                 showerror('ERRO', 'Essa variável já existe!')
             
-            self.window.destroy()
+            self.fechar()
         else:
             showerror('ERRO', 'Digite os campos corretamente!')
         
@@ -329,8 +379,9 @@ class EditWindow():
 
 
 class PropWindow:
-    def __init__(self, ghu) -> None:
+    def __init__(self, ghu, main: MainWindow) -> None:
         self.ghu = ghu
+        self.main = main
         self.window = tk.Tk()
                 
         # Configuraçōes da Janela
@@ -422,19 +473,18 @@ class PropWindow:
         self.prin.configure(relief="solid")
         self.prin.configure(anchor='center')
         self.prin.configure(font=fonte_texto)
-        self.prin.configure(text=ghu.resultado_final())
+        self.prin.configure(text=f'{ghu.resultado_final()} ')
         self.prin.place(x=10,y=340, width=480)
+        
+        self.window.protocol('WM_DELETE_WINDOW', self.fechar)
+    
+    def fechar(self):
+        del self.main.jans[self.main.jans.index(self)]
+        self.window.destroy()
         
     def run(self):
         self.window.mainloop()
 
-def is_numero(num:str) -> bool:
-    try:
-        float(num)
-    except:
-        return False
-
-    return True
 
 if __name__ == "__main__":
     app = MainWindow()

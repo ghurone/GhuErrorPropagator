@@ -1,7 +1,7 @@
 import math
 
 from sympy import *
-from sympy.parsing.sympy_parser import standard_transformations
+from sympy.parsing.sympy_parser import standard_transformations, convert_xor, function_exponentiation, implicit_multiplication
 
 
 class GhuErrorPropagator:
@@ -12,7 +12,7 @@ class GhuErrorPropagator:
         """
     
         self.func = parse_expr(expr,
-                               transformations=standard_transformations)
+                               transformations=(standard_transformations + (convert_xor,) + (function_exponentiation,) + (implicit_multiplication,)))
                                
         self.val = {}
         self.inc = {}
