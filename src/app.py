@@ -364,7 +364,7 @@ class EditWindow:
         valor = self.ivalor.get()
         inc = self.iinc.get()
         
-        if nome.isalpha() and N(valor).is_number and N(inc).is_number:
+        if not N(nome).is_number and N(valor).is_number and N(inc).is_number:
             if not self.main.ja_existe(nome) or nome == self.nome:
                 self.main.var.item(self.item, text="", values=(nome, valor, inc))
             else:
