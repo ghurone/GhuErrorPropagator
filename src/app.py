@@ -1,4 +1,5 @@
 from ghuerror import *
+from ico import icone
 
 import webbrowser
 import tkinter as tk
@@ -17,7 +18,9 @@ versao = '1.0.0'
 class MainWindow:
     def __init__(self) -> None:
         self.window = tk.Tk()
-
+        img = tk.PhotoImage(data=icone)
+        self.window.tk.call('wm', 'iconphoto', self.window._w, img)
+        
         window_height = 450
         window_width = 400
         screen_width = self.window.winfo_screenwidth()
@@ -201,6 +204,7 @@ class AddWindow:
     def __init__(self, main: object) -> None:
         self.main = main
         self.window = tk.Tk()
+        
                 
         # Configuraçōes da Janela
         self.window.title('Adicionar variável')
@@ -287,6 +291,7 @@ class EditWindow:
     def __init__(self, main: object, item) -> None:
         self.main = main
         self.window = tk.Tk()
+        
                 
         # Configuraçōes da Janela
         self.window.title('Editar variável')
@@ -383,6 +388,7 @@ class PropWindow:
         self.ghu = ghu
         self.main = main
         self.window = tk.Tk()
+        
                 
         # Configuraçōes da Janela
         self.window.title('Propagação - GhuErrorPropagator')
